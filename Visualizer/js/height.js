@@ -13,12 +13,12 @@ var DK = d3.locale( {
   "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 });
 
-var startTime = moment('15:10', 'HH:mm');
-var endTime = startTime.clone().add(3,'hours');
+var startTime = moment('18:45', 'HH:mm');
+var endTime = startTime.clone().add(2.5,'hours');
 var cheatOffset = 0;
 
-var bottomHeight = 0.18;
-var sideWidth = 0.20;
+var bottomHeight = 0.195;
+var sideWidth = 0.19;
 
 var chart = {
   heightData: null,
@@ -70,7 +70,7 @@ var chart = {
 
     this.y = d3.scale.linear()
       .domain([
-        0,40000,
+        0,45000,
       ])
       .range([height, height*(1-bottomHeight)]);
 
@@ -130,20 +130,13 @@ var chart = {
       .attr('class', 'liveArea')
 
 
-    this.liveHeight = svg
-      .append('path')
-      .classed('line liveheight',true)
-
-    this.liveHeightText = svg
-      .append('text')
-
-
+    
     this.liveBox = svg.append('g')
       .classed('livenumbers',true)
       .attr("transform", "translate("+width*(1-sideWidth)+"," + 0 + ")")
 
 
-    var y = 50;
+    var y = 70;
     var lHeight = 30;
     var bHeight = 70;
 
@@ -250,24 +243,34 @@ var chart = {
       .attr("d", this.valueline);
 
 
-
-    // Add the X Axis
-    svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
-
     // Add the Y Axis
     svg.append("g")
       .attr("class", "y axis")
       .call(yAxis);
 
+    // Add the X Axis
+    svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + (height)  + ")")
+      .call(xAxis);
+
+
+
     svg.selectAll('.y.axis text')
-      .attr("dx", 10)
+      .attr("dx", width-130)
       .style("text-anchor", "start");
 
     svg.selectAll('.x.axis text')
-      .attr("dy", -15)
+      .attr("dy", +30 -height*bottomHeight)
+
+    this.liveHeight = svg
+      .append('path')
+      .classed('line liveheight',true)
+
+    this.liveHeightText = svg
+      .append('text')
+      .classed('heightText',true)
+
 
 
   },
@@ -342,11 +345,11 @@ var chart = {
         this.liveTemp
           .text(DK.numberFormat(',')(Math.round(lastGraw.temp * 10) / 10) + " °C")
         this.livePreassure
-          .text(DK.numberFormat(',')(Math.round(lastGraw.tryk* 10) / 10) + " hPa")
+          .text(DK.numberFormat(',')(Math.round(lastGraw.tryk* 10) / 10) + " mbar")
         this.liveFugtighed
           .text(DK.numberFormat(',')(Math.round(lastGraw.fugtighed * 10) / 10) + " %")
         this.liveWind
-          .text(DK.numberFormat(',')(Math.round(lastGraw.windspeed * 10) / 10) + " knop")
+          .text(DK.numberFormat(',')(Math.round(lastGraw.windspeed*0.514 * 10) / 10) + " m/s")
       }
     }
 
