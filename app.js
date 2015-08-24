@@ -10,7 +10,7 @@ var fs = require('fs');
 
 
 //var aprsName = 'OZ2CLJ-11';
-var aprsName = 'SQ5AM-11';
+var aprsName = 'OZ2CLJ-11';
 
 var grawFilePath = process.env.GRAW_PATH || '../files/';
 
