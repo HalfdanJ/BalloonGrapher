@@ -198,7 +198,7 @@ d3.csv('data/ASTRA Simulation Results.csv')
   })
 
 setInterval(function(){
-  d3.json('http://localhost:5000/aprs', function(heightData) {
+  d3.json('/aprs', function(heightData) {
     heightData = _.map(heightData, function(d){
       d.time = new Date(d.time*1000);
       return d;
