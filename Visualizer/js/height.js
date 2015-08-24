@@ -164,7 +164,7 @@ var chart = {
     this.liveBox
       .append('text')
       .classed('liveLabel', true)
-      .text('Stigende hastighed')
+      .text('Vertikal hastighed')
       .attr('y', y)
 
     this.liveAltitudeSpeed = this.liveBox
@@ -272,7 +272,7 @@ var chart = {
       .text(DK.numberFormat(',')(Math.round(altitude))+" m")
 
     this.liveAltitudeSpeed
-      .text(DK.numberFormat(',')(Math.round(this.interpolatedData.altitude_speed*10)/10)+" m/s")
+      .text(DK.numberFormat(',')(Math.round(this.interpolatedData.altitude_speed*3.6))+" km/t")
 
 
 
