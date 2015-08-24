@@ -12,9 +12,23 @@ body {
 
 .simulation path {
     stroke: rgba(0,0,0,0.4);
-    stroke-width: 2;
+    stroke-width: 5;
     fill: none;
 }
+
+.live path {
+    stroke: rgba(255,0,0,1);
+    stroke-width: 5;
+    fill: none;
+}
+
+.liveheight {
+    stroke: rgba(255,0,0,1);
+    stroke-width: 2;
+    fill: none;
+
+}
+
 .area {
     fill: rgba(0,0,0,0.05);
     stroke-width: 0;
