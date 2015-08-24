@@ -11,7 +11,7 @@ var _ = require('underscore');
 var aprsName = 'K6RPT-11';
 
 
-var redisURL = url.parse(process.env.REDIS_URL);
+var redisURL = url.parse(process.env.REDIS_URL || 'redis://127.0.0.1:6379');
 var client = redis.createClient(redisURL.port, redisURL.hostname);
 if(redisURL.auth) {
   client.auth(redisURL.auth.split(":")[1]);
