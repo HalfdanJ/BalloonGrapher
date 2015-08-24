@@ -13,7 +13,7 @@ var DK = d3.locale( {
   "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 });
 
-var startTime = moment('15:33', 'HH:mm');
+var startTime = moment('13:10', 'HH:mm');
 var endTime = startTime.clone().add(3,'hours');
 
 var chart = {

@@ -8,7 +8,7 @@ var _ = require('underscore');
 
 
 //var aprsName = 'OZ2CLJ-11';
-var aprsName = 'K6RPT-11';
+var aprsName = 'SQ5AM-11';
 
 
 var redisURL = url.parse(process.env.REDIS_URL || 'redis://127.0.0.1:6379');
