@@ -13,9 +13,12 @@ var DK = d3.locale( {
   "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 });
 
-var startTime = moment('14:10', 'HH:mm');
+var startTime = moment('15:10', 'HH:mm');
 var endTime = startTime.clone().add(3,'hours');
-var cheatOffset = 1;
+var cheatOffset = 2;
+
+var bottomHeight = 0.18;
+var sideWidth = 0.20;
 
 var chart = {
   heightData: null,
@@ -69,13 +72,13 @@ var chart = {
       .domain([
         0,40000,
       ])
-      .range([height, height*0.82]);
+      .range([height, height*(1-bottomHeight)]);
 
     // Define the axes
     var xAxis = d3.svg.axis().scale(this.x)
       .orient("bottom")
       .ticks(3)
-      .innerTickSize(-height)
+      .innerTickSize(-height*bottomHeight)
       .tickFormat(function(d){ return d3.time.format("%H:%M")(d)} );
 
     var yAxis = d3.svg.axis().scale(this.y)
@@ -133,6 +136,42 @@ var chart = {
 
     this.liveHeightText = svg
       .append('text')
+
+
+    this.liveBox = svg.append('g')
+      .classed('livenumbers',true)
+      .attr("transform", "translate("+width*(1-sideWidth)+"," + 0 + ")")
+
+
+    var y = 50;
+    var lHeight = 30;
+    var bHeight = 70;
+
+    this.liveBox
+      .append('text')
+      .classed('liveLabel', true)
+      .text('Altitude')
+      .attr('y', y)
+
+    this.liveAltitude = this.liveBox
+      .append('text')
+      .classed('liveValue', true)
+      .attr('y', y+lHeight)
+
+    y+= bHeight;
+
+
+    this.liveBox
+      .append('text')
+      .classed('liveLabel', true)
+      .text('Stigende hastighed')
+      .attr('y', y)
+
+    this.liveAltitudeSpeed = this.liveBox
+      .append('text')
+      .classed('liveValue', true)
+      .attr('y', y+lHeight)
+
 
 
     /* .selectAll('g.live')
@@ -200,6 +239,7 @@ var chart = {
     var lastTime = moment(last.time);
 
     this.interpolatedData.altitude = last.altitude + moment().diff(lastTime,'ms') *  this.interpolatedData.altitude_speed / 1000;
+    this.interpolatedData.time = new Date();
   },
 
   updateFastTexts: function(){
@@ -219,21 +259,39 @@ var chart = {
     this.liveHeightText
       .text(DK.numberFormat(',')(Math.round(altitude))+" m")
       .attr('x', this.x(last.time)-30)
-      .attr('y', this.y(altitude)-8)
       .style("text-anchor", "start");
+
+    if(this.interpolatedData.altitude_speed > 0 || this.interpolatedData.altitude < 4000){
+      this.liveHeightText.attr('y', this.y(altitude)-8);
+    } else {
+      this.liveHeightText.attr('y', this.y(altitude)+20);
+    }
+
+
+    this.liveAltitude
+      .text(DK.numberFormat(',')(Math.round(altitude))+" m")
+
+    this.liveAltitudeSpeed
+      .text(DK.numberFormat(',')(Math.round(this.interpolatedData.altitude_speed*10)/10)+" m/s")
+
+
+
   },
 
   updateHeightGraph:function(){
     if(!this.heightData) return;
-    if(!this.interpolatedData) retur;
+    if(!this.interpolatedData || !this.interpolatedData.time || !this.interpolatedData.altitude|| !this.interpolatedData.altitude_speed) return;
+
     this.livePath
-      .data([_.union(this.heightData,this.interpolatedData)])
+      .data([this.heightData.concat(this.interpolatedData)])
       .attr("d", this.valueline);
 
     this.liveArea
-      .data([_.union(this.heightData,this.interpolatedData)])
+      .data([this.heightData.concat(this.interpolatedData)])
       .attr("d", this.valueArea);
 
+
+    console.log(this.heightData.length, this.heightData.concat(this.interpolatedData).length)
 
 
   }

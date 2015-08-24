@@ -39,6 +39,13 @@ text {
 
 }
 
+.liveLabel {
+    font-size:25px;
+}
+.liveValue {
+    font-size:30px;
+}
+
 .area {
     fill: rgba(0,0,0,0.05);
     stroke-width: 0;
