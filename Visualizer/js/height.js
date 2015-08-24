@@ -15,7 +15,7 @@ var DK = d3.locale( {
 
 var startTime = moment('15:10', 'HH:mm');
 var endTime = startTime.clone().add(3,'hours');
-var cheatOffset = 2;
+var cheatOffset = 0;
 
 var bottomHeight = 0.18;
 var sideWidth = 0.20;
@@ -173,6 +173,64 @@ var chart = {
       .attr('y', y+lHeight)
 
 
+    y+= bHeight;
+
+
+    this.liveBox
+      .append('text')
+      .classed('liveLabel', true)
+      .text('Temperatur')
+      .attr('y', y)
+
+    this.liveTemp = this.liveBox
+      .append('text')
+      .classed('liveValue', true)
+      .attr('y', y+lHeight)
+
+  y+= bHeight;
+
+
+    this.liveBox
+      .append('text')
+      .classed('liveLabel', true)
+      .text('Luft fugtighed')
+      .attr('y', y)
+
+    this.liveFugtighed = this.liveBox
+      .append('text')
+      .classed('liveValue', true)
+      .attr('y', y+lHeight)
+
+    y+= bHeight;
+
+
+    this.liveBox
+      .append('text')
+      .classed('liveLabel', true)
+      .text('Lufttryk')
+      .attr('y', y)
+
+    this.livePreassure = this.liveBox
+      .append('text')
+      .classed('liveValue', true)
+      .attr('y', y+lHeight)
+
+    y+= bHeight;
+
+
+    this.liveBox
+      .append('text')
+      .classed('liveLabel', true)
+      .text('Vind hastighed')
+      .attr('y', y)
+
+    this.liveWind = this.liveBox
+      .append('text')
+      .classed('liveValue', true)
+      .attr('y', y+lHeight)
+
+
+
 
     /* .selectAll('g.live')
      .attr("transform","translate(" + margin.left + "," + margin.top + ")")
@@ -216,6 +274,10 @@ var chart = {
 
   updateAprsData:function(data){
     this.heightData = data;
+  },
+
+  updateGrawData:function(data){
+    this.grawData = data;
   },
 
   updateInterpolation:function(){
@@ -274,7 +336,19 @@ var chart = {
     this.liveAltitudeSpeed
       .text(DK.numberFormat(',')(Math.round(this.interpolatedData.altitude_speed*3.6))+" km/t")
 
-
+    if(this.grawData) {
+      var lastGraw = _.last(this.grawData);
+      if(lastGraw) {
+        this.liveTemp
+          .text(DK.numberFormat(',')(Math.round(lastGraw.temp * 10) / 10) + " °C")
+        this.livePreassure
+          .text(DK.numberFormat(',')(Math.round(lastGraw.tryk* 10) / 10) + " hPa")
+        this.liveFugtighed
+          .text(DK.numberFormat(',')(Math.round(lastGraw.fugtighed * 10) / 10) + " %")
+        this.liveWind
+          .text(DK.numberFormat(',')(Math.round(lastGraw.windspeed * 10) / 10) + " knop")
+      }
+    }
 
   },
 
@@ -331,6 +405,30 @@ setInterval(function(){
     chart.updateHeightGraph();
   });
 }, 1000);
+
+
+setInterval(function(){
+  d3.json('/graw', function(grawData) {
+    console.log(_.last(grawData).time);
+
+    grawData = _.map(grawData, function(d){
+      d.time = moment.unix((d.time)).toDate();
+      return d;
+    })
+
+    console.log(_.last(grawData).time);
+
+    /* grawData = _.filter(grawData, function(r){
+      return moment(r.time).isBefore(moment())
+    })*/
+
+    chart.updateGrawData(grawData);
+  //  chart.updateAprsData(grawData);
+
+    //chart.updateHeightGraph();
+  });
+}, 1000);
+
 
 setInterval(function(){
   chart.updateInterpolation()
