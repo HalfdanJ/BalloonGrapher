@@ -146,7 +146,7 @@ var parseGraw = function(){
     var grawData = [];
 
     _.forEach(dataLines,function(l){
-      var match = l.match(/^(\d\d:\d\d)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)/i)
+      var match = l.match(/^(\d?\d\d:\d\d)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)/i)
       if(match){
         console.log("00:" + match[1],moment.duration("00:" + match[1]).humanize());
         grawData.push({
