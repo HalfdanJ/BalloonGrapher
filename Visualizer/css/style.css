@@ -4,7 +4,7 @@ body {
     width: 1920px;
     margin: 0 auto;
     font-size: 18px;
-    background-color: #262626;
+    background-color: green;
     line-height: 115%;
     height:1080px;
     overflow:hidden;
@@ -29,7 +29,7 @@ text {
 }
 
 .live .liveArea {
-    fill:rgba(255,0,0,0.4);
+    fill:rgba(190,0,0,1.0);
 }
 
 .liveheight {
