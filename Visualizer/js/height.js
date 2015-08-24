@@ -150,7 +150,7 @@ var chart = {
     this.liveBox
       .append('text')
       .classed('liveLabel', true)
-      .text('Altitude')
+      .text('Højde')
       .attr('y', y)
 
     this.liveAltitude = this.liveBox
@@ -168,6 +168,20 @@ var chart = {
       .attr('y', y)
 
     this.liveAltitudeSpeed = this.liveBox
+      .append('text')
+      .classed('liveValue', true)
+      .attr('y', y+lHeight)
+
+
+    y+= bHeight;
+
+    this.liveBox
+      .append('text')
+      .classed('liveLabel', true)
+      .text('Fart over jorden')
+      .attr('y', y)
+
+    this.liveSpeed= this.liveBox
       .append('text')
       .classed('liveValue', true)
       .attr('y', y+lHeight)
@@ -300,6 +314,7 @@ var chart = {
     var last = _.last(this.heightData);
     var lastTime = moment(last.time);
 
+    this.interpolatedData.speed = _.last(this.heightData).speed;
     this.interpolatedData.altitude = last.altitude + moment().diff(lastTime,'ms') *  this.interpolatedData.altitude_speed / 1000;
     this.interpolatedData.time = new Date();
   },
@@ -335,6 +350,9 @@ var chart = {
 
     this.liveAltitudeSpeed
       .text(DK.numberFormat(',')(Math.round(this.interpolatedData.altitude_speed*3.6))+" km/t")
+
+    this.liveSpeed
+      .text(DK.numberFormat(',')(Math.round(this.interpolatedData.speed))+" km/t")
 
     if(this.grawData) {
       var lastGraw = _.last(this.grawData);
