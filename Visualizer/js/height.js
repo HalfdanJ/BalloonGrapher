@@ -13,8 +13,9 @@ var DK = d3.locale( {
   "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 });
 
-var startTime = moment('13:10', 'HH:mm');
+var startTime = moment('14:10', 'HH:mm');
 var endTime = startTime.clone().add(3,'hours');
+var cheatOffset = 1;
 
 var chart = {
   heightData: null,
@@ -68,7 +69,7 @@ var chart = {
       .domain([
         0,40000,
       ])
-      .range([height, height*0.75]);
+      .range([height, height*0.82]);
 
     // Define the axes
     var xAxis = d3.svg.axis().scale(this.x)
@@ -84,10 +85,10 @@ var chart = {
       .tickFormat(function(d){ return DK.numberFormat(',m')(d)+' m'})
 
 
-    var area = d3.svg.area()
-      .x(function(d) { return x(d.time); })
+    this.valueArea = d3.svg.area()
+      .x(function(d) { return that.x(d.time); })
       .y0(height)
-      .y1(function(d) { return y(d.altitude); });
+      .y1(function(d) { return that.y(d.altitude); });
 
     // Define the line
     this.valueline = d3.svg.line()
@@ -115,10 +116,16 @@ var chart = {
       .append('g')
 
 
-    this.livePath = svg
+    this.live = svg
       .append("g")
       .classed('live', true)
-      .append('path')
+
+    this.livePath = this.live.append('path')
+      .attr('class','liveLine')
+
+    this.liveArea = this.live.append('path')
+      .attr('class', 'liveArea')
+
 
     this.liveHeight = svg
       .append('path')
@@ -144,6 +151,7 @@ var chart = {
       .attr("class", "line")
       //.style("stroke-dasharray", ("5, 10"))
       .attr("d", this.valueline);
+
 
 
     // Add the X Axis
@@ -217,10 +225,15 @@ var chart = {
 
   updateHeightGraph:function(){
     if(!this.heightData) return;
+    if(!this.interpolatedData) retur;
     this.livePath
-      .data([this.heightData])
-      .attr("class", "line")
+      .data([_.union(this.heightData,this.interpolatedData)])
       .attr("d", this.valueline);
+
+    this.liveArea
+      .data([_.union(this.heightData,this.interpolatedData)])
+      .attr("d", this.valueArea);
+
 
 
   }
@@ -247,7 +260,7 @@ d3.csv('data/ASTRA Simulation Results.csv')
 setInterval(function(){
   d3.json('/aprs', function(heightData) {
     heightData = _.map(heightData, function(d){
-      d.time = new Date((d.time + 60*60)*1000);
+      d.time = new Date((d.time + cheatOffset*60*60)*1000);
       return d;
     })
 
