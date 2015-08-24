@@ -77,7 +77,6 @@ var fetchAprs = function() {
             path = JSON.parse(d);
           }
 
-          console.log(info);
           var lastTimeUnix = parseInt(info.entries[0].lasttime);
           var lastTime = moment.unix(lastTimeUnix);
 
@@ -90,6 +89,12 @@ var fetchAprs = function() {
               speed: parseFloat(info.entries[0].speed),
               name: info.entries[0].name
             })
+
+            path = _.filter(path, function(p){
+              return moment.unix(p.time).isAfter(moment().subtract(10,'hours'))
+            })
+
+            console.log(path.length);
 
             client.set('aprsPath',JSON.stringify(path));
           }

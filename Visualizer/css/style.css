@@ -4,9 +4,14 @@ body {
     width: 1920px;
     margin: 0 auto;
     font-size: 18px;
-    background-color: white;
+    background-color: #262626;
     line-height: 115%;
+    height:1080px;
 
+}
+
+text {
+    fill:white;
 }
 
 

@@ -31,6 +31,11 @@ var chart = {
   livePath: null,
   valueLine:null,
 
+  interpolatedData: {
+    altitude : 0,
+    altitude_speed:0
+  },
+
 
   init: function() {
     var data = {};
@@ -46,9 +51,11 @@ var chart = {
   initChart: function() {
     var that = this;
 
-    var margin = {top: 30, right: 30, bottom: 100, left: 150},
-      width = $(window).width() - margin.left - margin.right,
-      height = $(window).height() - margin.top - margin.bottom;
+    var w = 1920;//$(window).width();
+    var h = 1080; //$(window).height()
+    var margin = {top: 0, right: 0, bottom: 0, left: 0},
+      width =  w - margin.left - margin.right,
+      height = h - margin.top - margin.bottom;
 
     this.x = d3.time.scale()
       .domain([
@@ -61,7 +68,7 @@ var chart = {
       .domain([
         0,40000,
       ])
-      .range([height, 0]);
+      .range([height, height*0.75]);
 
     // Define the axes
     var xAxis = d3.svg.axis().scale(this.x)
@@ -72,7 +79,7 @@ var chart = {
 
     var yAxis = d3.svg.axis().scale(this.y)
       .orient("left")
-      .ticks(5)
+      .tickValues([10000,20000,30000,40000])
       .innerTickSize(-width)
       .tickFormat(function(d){ return DK.numberFormat(',m')(d)+' m'})
 
@@ -149,20 +156,52 @@ var chart = {
     svg.append("g")
       .attr("class", "y axis")
       .call(yAxis);
+
+    svg.selectAll('.y.axis text')
+      .attr("dx", 10)
+      .style("text-anchor", "start");
+
+    svg.selectAll('.x.axis text')
+      .attr("dy", -15)
+
+
   },
 
-  updateHeight:function(data){
+  updateAprsData:function(data){
     this.heightData = data;
+  },
 
-    this.livePath
-      .data([this.heightData])
-      .attr("class", "line")
-      .attr("d", this.valueline);
+  updateInterpolation:function(){
+    if(!this.heightData) return;
+
+    var cnt = 0;
+    this.interpolatedData.altitude_speed = _.reduce(_.last(this.heightData,3), function(memo, d){
+        if(memo){
+          memo.speed += (d.altitude - memo.last.altitude) / moment(d.time).diff(memo.last.time,'seconds') ;
+          memo.last = d;
+          cnt++;
+          return memo;
+        } else {
+          return { last: d, speed:0}
+        }
+
+      },0).speed / cnt;
+
 
     var last = _.last(this.heightData);
-    var altitude = last.altitude;
+    var lastTime = moment(last.time);
+
+    this.interpolatedData.altitude = last.altitude + moment().diff(lastTime,'ms') *  this.interpolatedData.altitude_speed / 1000;
+  },
+
+  updateFastTexts: function(){
+    if(!this.heightData) return;
+
+    var last = _.last(this.heightData);
+    var altitude = this.interpolatedData.altitude;
+
     this.liveHeight
-      .transition()
+//      .transition()
       .attr('d', this.valueline([{
         time:startTime.toDate(), altitude:altitude
       }, {
@@ -171,9 +210,17 @@ var chart = {
 
     this.liveHeightText
       .text(DK.numberFormat(',')(Math.round(altitude))+" m")
-      .attr('x', 10)
-      .attr('y', this.y(altitude)-5);
+      .attr('x', this.x(last.time)-30)
+      .attr('y', this.y(altitude)-8)
+      .style("text-anchor", "start");
+  },
 
+  updateHeightGraph:function(){
+    if(!this.heightData) return;
+    this.livePath
+      .data([this.heightData])
+      .attr("class", "line")
+      .attr("d", this.valueline);
 
 
   }
@@ -200,10 +247,22 @@ d3.csv('data/ASTRA Simulation Results.csv')
 setInterval(function(){
   d3.json('/aprs', function(heightData) {
     heightData = _.map(heightData, function(d){
-      d.time = new Date(d.time*1000);
+      d.time = new Date((d.time + 60*60)*1000);
       return d;
     })
-    chart.updateHeight(heightData);
 
+    heightData = _.filter(heightData, function(r){
+      return moment(r.time).isBefore(moment())
+    })
+
+    chart.updateAprsData(heightData);
+
+    chart.updateHeightGraph();
   });
 }, 1000);
+
+setInterval(function(){
+  chart.updateInterpolation()
+  chart.updateFastTexts()
+
+}, 100);
