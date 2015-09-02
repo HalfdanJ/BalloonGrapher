@@ -1,6 +1,6 @@
 /* Document styling */
 body {
-    font-family: "Gotham", Helvetica, sans-serif;
+    font-family: "Gotham XNarrow", Helvetica, sans-serif;
     width: 1920px;
     margin: 0 auto;
     font-size: 18px;
@@ -8,6 +8,7 @@ body {
     line-height: 115%;
     height:1080px;
     overflow:hidden;
+    font-weight: 100;
 
 }
 

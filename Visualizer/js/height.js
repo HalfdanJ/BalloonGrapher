@@ -13,7 +13,7 @@ var DK = d3.locale( {
   "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 });
 
-var startTime = moment('18:30', 'HH:mm');
+var startTime = moment('14:55', 'HH:mm');
 var endTime = startTime.clone().add(2.5,'hours');
 var cheatOffset = 0;
 
@@ -119,6 +119,17 @@ var chart = {
         .enter()
         .append('g')
     }
+
+        // Add the Y Axis
+    svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis);
+
+    // Add the X Axis
+    svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + (height)  + ")")
+      .call(xAxis);
 
     this.live = svg
       .append("g")
@@ -260,16 +271,7 @@ var chart = {
     }
 
 
-    // Add the Y Axis
-    svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis);
 
-    // Add the X Axis
-    svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + (height)  + ")")
-      .call(xAxis);
 
 
 
@@ -343,12 +345,14 @@ var chart = {
         time:endTime.toDate(), altitude:altitude
       }, ]))
 
+      var x = this.x(last.time)-30;
+      if(x < 30) x = 30;
     this.liveHeightText
       .text(DK.numberFormat(',')(Math.round(altitude))+" m")
-      .attr('x', this.x(last.time)-30)
+      .attr('x', x)
       .style("text-anchor", "start");
 
-    if(this.interpolatedData.altitude_speed > 0 || this.interpolatedData.altitude < 4000){
+    if(this.interpolatedData.altitude_speed > 0 || this.interpolatedData.altitude < 10000){
       this.liveHeightText.attr('y', this.y(altitude)-8);
     } else {
       this.liveHeightText.attr('y', this.y(altitude)+20);
@@ -366,6 +370,7 @@ var chart = {
 
     if(this.grawData) {
       var lastGraw = _.last(this.grawData);
+      //startTime = moment(this.grawData[0].time)
       if(lastGraw) {
         this.liveTemp
           .text(DK.numberFormat(',')(Math.round(lastGraw.temp * 10) / 10) + " °C")

@@ -10,7 +10,7 @@ var fs = require('fs');
 
 
 //var aprsName = 'OZ2CLJ-11';
-var aprsName = 'OZ2CLJ-11';
+var aprsName = 'PY3MO-11';
 
 var grawFilePath = process.env.GRAW_PATH || '../files/';
 
@@ -128,43 +128,51 @@ var parseGraw = function(){
   var files = fs.readdirSync(Path.join(__dirname, grawFilePath));
   files.sort();
   var file = _.last(files);
-  var content = fs.readFileSync(Path.join(__dirname, grawFilePath,file)).toString();
-  console.log(file);
-  var lines = content.split('\n');
-  console.log(lines.length);
 
-  if(grawNumLinesLast != lines.length){
-    grawNumLinesLast = lines.length;
+  var stats = fs.statSync(Path.join(__dirname, grawFilePath,file));
+  
+  var diff = moment(stats.mtime).diff(moment(), 'seconds');
+  console.log("Diff: "+diff);
+  if(Math.abs(diff) > 10){
+    var content = fs.readFileSync(Path.join(__dirname, grawFilePath,file)).toString();
+    console.log(file);
+    var lines = content.split('\n');
+    console.log(lines.length);
 
-    console.log("Parse");
+    if(grawNumLinesLast != lines.length){
+      grawNumLinesLast = lines.length;
 
-    var startTime = lines[0].match(/Start time: (\d\d:\d\d:\d\d)/i)[1];
-    startTime = moment(startTime, 'HH:mm:ss').add(2,'hours');
-    console.log(startTime.format());
+      console.log("Parse");
 
-    var dataLines = _.rest(lines,9);
-    var grawData = [];
+      var startTime = lines[0].match(/Start time: (\d\d:\d\d:\d\d)/i)[1];
+      startTime = moment(startTime, 'HH:mm:ss').add(2,'hours');
+      console.log(startTime.format());
 
-    _.forEach(dataLines,function(l){
-      var match = l.match(/^(\d?\d\d:\d\d)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)/i)
-      if(match){
-        console.log("00:" + match[1],moment.duration("00:" + match[1]).humanize());
-        grawData.push({
-          time: startTime.clone().add(moment.duration("00:"+match[1])).format('X'),
-          tryk: parseFloat(match[2]),
-          temp: parseFloat(match[3]),
-          fugtighed: parseFloat(match[4]),
-          windspeed: parseFloat(match[5]),
-          winddir: parseFloat(match[6]),
-          lon: parseFloat(match[7]),
-          lat: parseFloat(match[8]),
-          altitude: parseFloat(match[9])
-        })
-      }
-    })
-    client.set('grawData',JSON.stringify(grawData));
+      var dataLines = _.rest(lines,9);
+      var grawData = [];
 
-    console.log(grawData);
+      _.forEach(dataLines,function(l){
+        var match = l.match(/^(\d?\d\d:\d\d)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)\s+([\d\.\-]+)/i)
+        if(match){
+          console.log("00:" + match[1],moment.duration("00:" + match[1]).humanize());
+          grawData.push({
+            time: startTime.clone().add(moment.duration("00:"+match[1])).format('X'),
+            tryk: parseFloat(match[2]),
+            temp: parseFloat(match[3]),
+            fugtighed: parseFloat(match[4]),
+            windspeed: parseFloat(match[5]),
+            winddir: parseFloat(match[6]),
+            lon: parseFloat(match[7]),
+            lat: parseFloat(match[8]),
+            altitude: parseFloat(match[9])
+          })
+        }
+      })
+      client.set('grawData',JSON.stringify(grawData));
+    
+
+      console.log(grawData);
+    }
 
 
 
