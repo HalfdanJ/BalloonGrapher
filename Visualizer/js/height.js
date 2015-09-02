@@ -13,7 +13,7 @@ var DK = d3.locale( {
   "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 });
 
-var startTime = moment('18:45', 'HH:mm');
+var startTime = moment('18:30', 'HH:mm');
 var endTime = startTime.clone().add(2.5,'hours');
 var cheatOffset = 0;
 
@@ -108,16 +108,17 @@ var chart = {
       .attr("transform","translate(" + margin.left + "," + margin.top + ")")
 
 
+    if(getParameterByName('simulation')) {
 
 
-    var simulation = svg
-      .append("g")
-      .classed('simulation', true)
-      .selectAll('g.simulation')
-      .data(this.simulationData)
-      .enter()
-      .append('g')
-
+      var simulation = svg
+        .append("g")
+        .classed('simulation', true)
+        .selectAll('g.simulation')
+        .data(this.simulationData)
+        .enter()
+        .append('g')
+    }
 
     this.live = svg
       .append("g")
@@ -251,10 +252,12 @@ var chart = {
      .attr('class', 'area')
      .attr('d', area)*/
 
-    simulation.append('path')
-      .attr("class", "line")
-      //.style("stroke-dasharray", ("5, 10"))
-      .attr("d", this.valueline);
+    if(getParameterByName('simulation')) {
+      simulation.append('path')
+        .attr("class", "line")
+        //.style("stroke-dasharray", ("5, 10"))
+        .attr("d", this.valueline);
+    }
 
 
     // Add the Y Axis
@@ -319,6 +322,10 @@ var chart = {
 
     this.interpolatedData.speed = _.last(this.heightData).speed;
     this.interpolatedData.altitude = last.altitude + moment().diff(lastTime,'ms') *  this.interpolatedData.altitude_speed / 1000;
+    if(this.interpolatedData.altitude < 0){
+      this.interpolatedData.altitude = 0;
+      this.interpolatedData.speed = 0;
+    }
     this.interpolatedData.time = new Date();
   },
 
@@ -392,23 +399,23 @@ var chart = {
   }
 }
 
+  d3.csv('data/ASTRA Simulation Results.csv')
+    .row(function (d) {
 
-d3.csv('data/ASTRA Simulation Results.csv')
-  .row(function(d){
+      var t = startTime.clone().add(parseInt(d['Time from launch [s]']), 'seconds').toDate();
+      return {
+        simulation: parseInt(d['Simulation #']),
+        time: t,
+        lat: parseFloat(d['Latitude']),
+        lon: parseFloat(d['Longitude']),
+        altitude: parseFloat(d['Altitude [m]'])
+      }
+    })
+    .get(function (error, rows) {
+      chart.simulationData = rows;
+      chart.init();
+    })
 
-    var t = startTime.clone().add(parseInt(d['Time from launch [s]']),'seconds').toDate();
-    return {
-      simulation: parseInt(d['Simulation #']),
-      time: t,
-      lat: parseFloat(d['Latitude']),
-      lon: parseFloat(d['Longitude']),
-      altitude: parseFloat(d['Altitude [m]'])
-    }
-  })
-  .get(function(error, rows){
-    chart.simulationData = rows;
-    chart.init();
-  })
 
 setInterval(function(){
   d3.json('/aprs', function(heightData) {
@@ -456,3 +463,11 @@ setInterval(function(){
   chart.updateFastTexts()
 
 }, 100);
+
+
+function getParameterByName(name) {
+  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+    results = regex.exec(location.search);
+  return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
